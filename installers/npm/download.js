@@ -12,14 +12,14 @@ var zlib = require('zlib');
 // called when --ignore-scripts is enabled. That's why install.js is so weird.
 
 
-module.exports = function(callback)
-{
+module.exports = function (callback) {
 	// figure out URL of binary
 	var version = package.version.replace(/^(\d+\.\d+\.\d+).*$/, '$1'); // turn '1.2.3-alpha' into '1.2.3'
 
 	var platform = {
 		darwin_x64: 'mac-64-bit',
 		darwin_arm64: 'mac-64-bit',
+		linux_arm64: 'mac-64-bit',
 		win32_x64: 'windows-64-bit',
 		linux_x64: 'linux-64-bit'
 	}[process.platform + '_' + process.arch];
@@ -34,13 +34,12 @@ module.exports = function(callback)
 	var binaryPath = path.resolve(__dirname, package.bin.elm) + (process.platform === 'win32' ? '.exe' : '');
 
 	// set up handler for request failure
-	function reportDownloadFailure(error)
-	{
-		exitFailure(url,'Something went wrong while fetching the following URL:\n\n' + url + '\n\nIt is saying:\n\n' + error);
+	function reportDownloadFailure(error) {
+		exitFailure(url, 'Something went wrong while fetching the following URL:\n\n' + url + '\n\nIt is saying:\n\n' + error);
 	}
 
 	// set up decompression pipe
-	var gunzip = zlib.createGunzip().on('error', function(error) {
+	var gunzip = zlib.createGunzip().on('error', function (error) {
 		exitFailure(url, 'I ran into trouble decompressing the downloaded binary. It is saying:\n\n' + error);
 	});
 
@@ -48,7 +47,7 @@ module.exports = function(callback)
 	var write = fs.createWriteStream(binaryPath, {
 		encoding: 'binary',
 		mode: 0o755
-	}).on('finish', callback).on('error', function(error) {
+	}).on('finish', callback).on('error', function (error) {
 		exitFailure(url, 'I had some trouble writing file to disk. It is saying:\n\n' + error);
 	});
 
@@ -61,8 +60,7 @@ module.exports = function(callback)
 // VERIFY PLATFORM
 
 
-function verifyPlatform(version, platform)
-{
+function verifyPlatform(version, platform) {
 	if (platform) return;
 
 	var situation = process.platform + '_' + process.arch;
@@ -85,8 +83,7 @@ function verifyPlatform(version, platform)
 // EXIT FAILURE
 
 
-function exitFailure(url, message)
-{
+function exitFailure(url, message) {
 	console.error(
 		'-- ERROR -----------------------------------------------------------------------\n\n'
 		+ message
@@ -102,8 +99,7 @@ function exitFailure(url, message)
 // REPORT DOWNLOAD
 
 
-function reportDownload(version, url)
-{
+function reportDownload(version, url) {
 	console.log(
 		'--------------------------------------------------------------------------------\n\n'
 		+ 'Downloading Elm ' + version + ' from GitHub.'
